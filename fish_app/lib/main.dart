@@ -1,9 +1,8 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'photo.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,36 +10,84 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
+    return MaterialApp(
+      title: 'App avec navigation',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 133, 181, 78)),
       ),
+      home: const MainPage(),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
 }
 
-class MyHomePage extends StatelessWidget {
+class _MainPageState extends State<MainPage> {
+  int _selectedIndex = 0;
+
+  // Liste des pages à afficher
+  static final List<Widget> _pages = <Widget>[
+    HomePage(),
+    PhotoPage(),
+    ProfilPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
     return Scaffold(
-      body: Column(
-        children: [
-          Text('A random idea:'),
-          Text(appState.current.asLowerCase),
+      body: Center(child: _pages[_selectedIndex]),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo),
+            label: 'Photo',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo),
+            label: 'Profil',
+          ),
         ],
       ),
     );
   }
 }
+
+// Page d'accueil
+class HomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'Bienvenue à la page d\'accueil',
+      style: TextStyle(fontSize: 20),
+    );
+  }
+}
+
+class ProfilPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'Bienvenue à la page de profil',
+      style: TextStyle(fontSize: 20),
+    );
+  }
+}
+
