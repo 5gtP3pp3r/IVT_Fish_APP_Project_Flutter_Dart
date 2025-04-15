@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'photo.dart';
+import 'package:fish_app/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -74,9 +75,9 @@ class _MainPageState extends State<MainPage> {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Bienvenue à la page d\'accueil',
-      style: TextStyle(fontSize: 20),
+    return MaterialApp(
+      title: 'InstaFish',
+      home: const LoginPage(),
     );
   }
 }
@@ -90,4 +91,3 @@ class ProfilPage extends StatelessWidget {
     );
   }
 }
-
