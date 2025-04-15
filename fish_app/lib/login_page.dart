@@ -13,11 +13,11 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   void _login() {
-    String email = _emailController.text.trim();
+    String username = _emailController.text.trim();
     String password = _passwordController.text;
 
 
-    if (email == 'admin@example.com' && password == '123456') {
+    if (username == 'admin' && password == 'admin') {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Connexion réussie !')),
@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Nom d\'utilisateur',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
