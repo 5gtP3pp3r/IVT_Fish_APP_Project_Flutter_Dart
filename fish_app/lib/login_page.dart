@@ -80,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Bouton de connexion
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
