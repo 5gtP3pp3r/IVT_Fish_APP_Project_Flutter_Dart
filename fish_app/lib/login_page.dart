@@ -16,9 +16,7 @@ class _LoginPageState extends State<LoginPage> {
     String username = _emailController.text.trim();
     String password = _passwordController.text;
 
-
     if (username == 'admin' && password == 'admin') {
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Connexion réussie !')),
       );
@@ -40,14 +38,14 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('images/WalleyeLogo.png', width: 80, height: 80),
+                Image.asset('assets/images/WalleyeLogo.png',
+                    width: 80, height: 80),
                 const SizedBox(height: 16),
                 const Text(
                   'InstaFish!',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 32),
-
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -58,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
-
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -68,7 +65,9 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -79,7 +78,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
