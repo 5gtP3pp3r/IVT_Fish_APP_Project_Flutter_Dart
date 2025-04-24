@@ -1,26 +1,47 @@
 import 'package:flutter/material.dart';
-import 'photo.dart';
 import 'package:fish_app/login_page.dart';
+import 'package:flutter/services.dart';
+import 'photo.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const MyApp());
+  });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isLoggedIn = false;
+
+  void handleLoginSuccess() {
+    setState(() {
+      isLoggedIn = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'App avec navigation',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 133, 181, 78)),
-      ),
-      home: const MainPage(),
+      home: isLoggedIn
+          ? const MainPage()
+          : LoginPage(onLoginSuccess: handleLoginSuccess),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -75,12 +96,12 @@ class _MainPageState extends State<MainPage> {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'InstaFish',
-      home: const LoginPage(),
+    return const Center(
+      child: Text('Bienvenue sur InstaFish!'),
     );
   }
 }
+
 
 class ProfilPage extends StatelessWidget {
   @override
