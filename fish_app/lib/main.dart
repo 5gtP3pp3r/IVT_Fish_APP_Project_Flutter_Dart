@@ -35,7 +35,7 @@ class _MainPageState extends State<MainPage> {
   // Liste des pages à afficher
   static final List<Widget> _pages = <Widget>[
     HomePage(),
-    PhotoPage(),
+    CameraPage(),
     ProfilPage(),
   ];
 
