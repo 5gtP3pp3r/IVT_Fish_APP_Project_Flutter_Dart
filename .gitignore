@@ -104,3 +104,4 @@ doc/api/
 .env
 
 # End of https://www.toptal.com/developers/gitignore/api/dart
+.vscode/settings.json
