@@ -99,8 +99,8 @@ class _CameraPageState extends State<CameraPage> {
                 const SizedBox(height: 40),
                 Center(
                   child: SizedBox(
-                    width: 300,
-                    height: 300,
+                    width: 330,
+                    height: 330,
                     child: CameraPreview(_controller!),
                   ),
                 ),
@@ -111,7 +111,7 @@ class _CameraPageState extends State<CameraPage> {
                     ElevatedButton.icon(
                       onPressed: _switchCamera,
                       icon: const Icon(Icons.cameraswitch),
-                      label: const Text('Changer camera'),
+                      label: const Text('Caméra'),
                     ),
                     const SizedBox(width: 20),
                     ElevatedButton.icon(
