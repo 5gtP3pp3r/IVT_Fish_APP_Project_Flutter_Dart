@@ -38,12 +38,12 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/WalleyeLogo.png',
-                    width: 80, height: 80),
-                const SizedBox(height: 16),
+                Image.asset('assets/images/WalleyeLogo.jpg',
+                    width: 350, height: 350),
+                const SizedBox(height: 10),
                 const Text(
                   'InstaFish!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 32),
                 TextField(
@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _login,
-                    child: const Text('Se connecter'),
+                    child: const Text('Fish on!'),
                   ),
                 ),
               ],
