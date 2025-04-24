@@ -1,0 +1,53 @@
+
+format liste image 
+[
+	{ "pictname" : "assets/photos/achigan.jpg",
+      	"species" : "achigan",
+      	"latitude" : 46.8127,
+      	"longitude" : -71.2193,
+      	"date" : "2025-04-24",
+      	"time" : "13:15:00",
+      	"temp" : 18.5,
+      	"precipitype" : [
+        	"rain"
+      	],
+      	"cloudcover" : 40.5,
+      	"uvindex" : 9,
+      	"moonphase" : 0.89
+        }
+]
+
+call api meteo, latitude et longitude en variable : https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/46.8127%2C%20-71.2193?unitGroup=metric&elements=datetime%2Clatitude%2Clongitude%2Ctemp%2Cpreciptype%2Ccloudcover%2Cuvindex%2Cmoonphase&include=current&key=55KR4QFM72XPU8A8BPNE92AED&contentType=json
+
+
+réponse : {
+ "queryCost": 1,
+ "latitude": 46.8127,
+ "longitude": -71.2193,
+ "resolvedAddress": "46.8127, -71.2193",
+ "address": "46.8127, -71.2193",
+ "timezone": "America/Toronto",
+ "tzoffset": -4,
+ "days": [
+  {
+   "datetime": "2025-04-24",
+   "datetimeEpoch": 1745467200,
+   "temp": 8.7,
+   "preciptype": [
+    "rain"
+   ],
+   "cloudcover": 40.5,
+   "uvindex": 9,
+   "moonphase": 0.89
+  }
+ ],
+ "currentConditions": {
+  "datetime": "13:15:00",
+  "datetimeEpoch": 1745514900,
+  "temp": 12.9,
+  "preciptype": null,
+  "cloudcover": 88,
+  "uvindex": 7,
+  "moonphase": 0.89
+ }
+}
