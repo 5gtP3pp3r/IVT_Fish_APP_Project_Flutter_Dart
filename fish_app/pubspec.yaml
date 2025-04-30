@@ -19,11 +19,13 @@ dependencies:
   permission_handler: ^11.0.1
   path: ^1.9.1
   font_awesome_flutter: ^10.8.0
+  http: ^0.13.6
+  crypto: ^3.0.3
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  http: ^0.13.6
 
   flutter_lints: ^2.0.0
 
