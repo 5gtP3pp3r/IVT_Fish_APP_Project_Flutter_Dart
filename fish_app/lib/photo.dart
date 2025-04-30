@@ -31,8 +31,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
-    }
-    else if (state == AppLifecycleState.resumed) {
+    } else if (state == AppLifecycleState.resumed) {
       _initializeSelectedCamera();
     }
   }
@@ -91,10 +90,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     final image = await _controller!.takePicture();
 
-    final File newImage = File(filePath);
     await File(image.path).copy(filePath);
 
-    await Gal.putImage(image.path);
+    await Gal.putImage(filePath);
 
     setState(() {
       _photo = XFile(filePath);
