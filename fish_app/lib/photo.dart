@@ -1,7 +1,10 @@
-import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
+import 'package:path/path.dart' as path;
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -10,7 +13,7 @@ class CameraPage extends StatefulWidget {
   State<CameraPage> createState() => _CameraPageState();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   List<CameraDescription> _cameras = [];
   int _selectedCameraIndex = 0;
 
@@ -18,14 +21,33 @@ class _CameraPageState extends State<CameraPage> {
   Future<void>? _initializeControllerFuture;
 
   XFile? _photo;
-  List<String> _photosFromJson = [];
-  bool _photosLoaded = false;
+  List<String> _savedPhotos = [];
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (_controller == null || _controller?.value.isInitialized == false)
+      return;
+
+    if (state == AppLifecycleState.inactive) {
+      _controller?.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initializeSelectedCamera();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _initCamera();
-    _loadPhotosFromJson();
+    _requestPermissions().then((_) {
+      _loadSavedPhotos();
+    });
+  }
+
+  Future<void> _requestPermissions() async {
+    await Permission.camera.request();
+    await Permission.storage.request();
   }
 
   Future<void> _initCamera() async {
@@ -41,16 +63,13 @@ class _CameraPageState extends State<CameraPage> {
 
     _controller = CameraController(
       selectedCamera,
-      ResolutionPreset.medium,
+      ResolutionPreset.high,
     );
 
     _initializeControllerFuture = _controller!.initialize();
-    
-    // N'actualisez que la partie caméra et non toute l'interface
+
     if (mounted) {
-      setState(() {
-        // Ne mettre à jour que les variables liées à la caméra
-      });
+      setState(() {});
     }
   }
 
@@ -63,28 +82,42 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<void> _takePhoto() async {
     await _initializeControllerFuture;
+
+    final directory = await getApplicationDocumentsDirectory();
+    final String fileName =
+        'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final String filePath = path.join(directory.path, fileName);
+
     final image = await _controller!.takePicture();
 
+    await File(image.path).copy(filePath);
+
+    await Gal.putImage(filePath);
+
     setState(() {
-      _photo = image;
-      // Ici, vous pourriez ajouter la photo à la galerie si nécessaire
+      _photo = XFile(filePath);
     });
+
+    _loadSavedPhotos();
   }
 
-  Future<void> _loadPhotosFromJson() async {
-    if (_photosLoaded) return;
-    
+  Future<void> _loadSavedPhotos() async {
     try {
-      final String jsonString =
-          await rootBundle.loadString('assets/photos/photos.json');
-      final List<dynamic> jsonData = json.decode(jsonString);
-      
+      final directory = await getApplicationDocumentsDirectory();
+      final files = Directory(directory.path)
+          .listSync()
+          .where((file) =>
+              file.path.endsWith('.jpg') ||
+              file.path.endsWith('.png') ||
+              file.path.endsWith('.jpeg'))
+          .map((f) => f.path)
+          .toList();
+
       setState(() {
-        _photosFromJson = jsonData.cast<String>();
-        _photosLoaded = true;
+        _savedPhotos = files;
       });
     } catch (e) {
-      print('Erreur lors du chargement des photos JSON: $e');
+      print('Erreur lors du chargement des photos: $e');
     }
   }
 
@@ -143,12 +176,10 @@ class _CameraPageState extends State<CameraPage> {
           const SizedBox(height: 10),
           const Divider(thickness: 1),
           const SizedBox(height: 8),
-          
-          // Section galerie
           Expanded(
-            child: _photosLoaded
-                ? PhotoGallery(photos: _photosFromJson)
-                : const Center(child: CircularProgressIndicator()),
+            child: _savedPhotos.isEmpty
+                ? const Center(child: Text('Aucune photo disponible'))
+                : PhotoGallery(photos: _savedPhotos),
           ),
         ],
       ),
@@ -158,15 +189,11 @@ class _CameraPageState extends State<CameraPage> {
 
 class PhotoGallery extends StatelessWidget {
   final List<String> photos;
-  
+
   const PhotoGallery({super.key, required this.photos});
 
   @override
   Widget build(BuildContext context) {
-    if (photos.isEmpty) {
-      return const Center(child: Text('Aucune photo disponible'));
-    }
-
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: photos.length,
@@ -176,8 +203,8 @@ class PhotoGallery extends StatelessWidget {
         mainAxisSpacing: 8,
       ),
       itemBuilder: (context, index) {
-        return Image.asset(
-          photos[index],
+        return Image.file(
+          File(photos[index]),
           fit: BoxFit.cover,
         );
       },
