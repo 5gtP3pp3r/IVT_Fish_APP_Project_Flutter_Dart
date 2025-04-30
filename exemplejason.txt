@@ -66,7 +66,7 @@ ac546059a5a57d1802ce6179
   - file name ->  .jpg
   - MIME      ->  image/jpeg
   - byte size ->  1234546789...
-  - MD5 chechksum (BNase64-encoded)
+  - MD5 chechksum (Base64-encoded)
 
 2- Obtenir access token (post):
   - exemple en bash:
@@ -100,7 +100,7 @@ token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTk
           }
         }'
 
-    -Réponse: 
+  -Réponse: 
         {
           "id": 1399956,
           "key": "hpleg1o4wez3e7mvy1sivhep9dw6",
@@ -139,7 +139,7 @@ MD5sum  --header 'Content-Md5: EA5w4bPQDfzBgEbes8ZmuQ==' \
 q=1-->  --url 'https://api.fishial.ai/v1/recognition/image?q=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNVJjRlE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ%3D%3D--269b0ee106c8739e2248645965ad0fc868b20c7c' \
 token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTkzNzQsImtpZCI6ImMwZmFlMTc0ZjI0YzA5NTAzNTJjMmJiZCJ9.SwJITJXPcGXu9E6UYPNXq0kTfPRZ_O-qe3FGV7ZTxZM'
 
-    -Réponse:
+  -Réponse:
         {
           "results": [
             {
