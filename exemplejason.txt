@@ -51,3 +51,125 @@ réponse : {
   "moonphase": 0.89
  }
 }
+
+Compte William Fishial.IA
+secret API KEY
+55a0a759810b8226526fecd4d5b26518
+API KEY
+ac546059a5a57d1802ce6179
+
+**************************************
+ÉTAPES POUR UTILISER L'API FISHIAL.API
+**************************************
+
+1- Obtenir les metedata de la photo:
+  - file name ->  .jpg
+  - MIME      ->  image/jpeg
+  - byte size ->  1234546789...
+  - MD5 chechksum (BNase64-encoded)
+
+2- Obtenir access token (post):
+  - exemple en bash:
+      curl --request POST \
+      --url https://api-users.fishial.ai/v1/auth/token \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "client_id": "ac546059a5a57d1802ce6179",
+        "client_secret": "55a0a759810b8226526fecd4d5b26518"
+      }'
+  
+  -Réponse: 
+      {
+        "token_type": "Bearer",
+        "access_token": "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTkzNzQsImtpZCI6ImMwZmFlMTc0ZjI0YzA5NTAzNTJjMmJiZCJ9.SwJITJXPcGXu9E6UYPNXq0kTfPRZ_O-qe3FGV7ZTxZM"
+      }
+
+3- Upload cloud (post):
+   - exemple en bash:
+       curl --request POST \
+        --url https://api.fishial.ai/v1/recognition/upload \
+        --header 'Accept: application/json' \
+token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTkzNzQsImtpZCI6ImMwZmFlMTc0ZjI0YzA5NTAzNTJjMmJiZCJ9.SwJITJXPcGXu9E6UYPNXq0kTfPRZ_O-qe3FGV7ZTxZM' \
+        --header 'Content-Type: application/json' \
+        --data '{
+          "blob": {
+            "filename": "fishpic.jpg",
+            "content_type": "image/jpeg",
+            "byte_size": 2204455,
+            "checksum": "EA5w4bPQDfzBgEbes8ZmuQ=="
+          }
+        }'
+
+    -Réponse: 
+        {
+          "id": 1399956,
+          "key": "hpleg1o4wez3e7mvy1sivhep9dw6",
+          "filename": "fishpic.jpg",
+          "content-type": "image/jpeg",
+          "metadata": {},
+          "byte-size": 2204455,
+          "checksum": "EA5w4bPQDfzBgEbes8ZmuQ==",
+          "created-at": "2022-06-30T19:53:07.695Z",
+          "service-name": "google",
+  1-->    "signed-id": "eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNVJjRlE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--269b0ee106c8739e2248645965ad0fc868b20c7c",
+          "attachable-sgid": "BAh7CEkiCGdpZAY6BkVUSSJPZ2lkOi8vZmlzaGlhbC1wb3J0YWwtYmFja2VuZC1maXNoZXMvQWN0aXZlU3RvcmFnZTo6QmxvYi8xMzk5OTU2P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--f33ed3bd1d50febd02cd1986655805c71b3699ea",
+          "direct-upload": {
+  2-->      "url": "https://storage.googleapis.com/backend-fishes-storage-prod/hpleg1o4wez3e7mvy1sivhep9dw6?GoogleAccessId=services-storage-client%40ecstatic-baton-230905.iam.gserviceaccount.com&Expires=1656619087&Signature=aMeN%2FVW4I6LDgLRUEW0jzJqeA89gRpjn0TBcGMEnal3RU1iGqe0uOraHainV5qUw6tRPEBRBJ6rMeu9x0AmX6OC3Q8cCCmBUMs4k1jCQOnnCNgkttpU7ov%2FeZ9WpPr47rTQSd5np7jCG3EWVEBhNeP25%2BTx5JlKQQ8UErP%2Bc46Lr%2Bj28wgLw%2BeeVjO4sVjEnLx3djoZD0Htei5XR0YQKVr%2FGDbS4iBOmjPsD5g4txKM6071zft%2BFK6U7I%2FfWjef2w4Nx%2BVvdATkNRpVEzbkAv1lBWMhfrOLy5koJfGepFk0BGQbTXNokhFCQYxzQuJBeC1xubKHzZSQLCVnTXt4EXA%3D%3D",
+            "headers": {
+  3-->      "Content-MD5": "EA5w4bPQDfzBgEbes8ZmuQ==",
+  4-->      "Content-Disposition": "inline; filename=\"fishpic.jpg\"; filename*=UTF-8''fishpic.jpg"
+            }
+          }
+        }    
+
+4- Envoyer l'image (put):
+    - exemple en bash:
+      curl --request PUT \
+2-->    --url 'https://storage.googleapis.com/backend-fishes-storage-prod/hpleg1o4wez3e7mvy1sivhep9dw6?GoogleAccessId=services-storage-client%40ecstatic-baton-230905.iam.gserviceaccount.com&Expires=1656619087&Signature=aMeN%2FVW4I6LDgLRUEW0jzJqeA89gRpjn0TBcGMEnal3RU1iGqe0uOraHainV5qUw6tRPEBRBJ6rMeu9x0AmX6OC3Q8cCCmBUMs4k1jCQOnnCNgkttpU7ov%2FeZ9WpPr47rTQSd5np7jCG3EWVEBhNeP25%2BTx5JlKQQ8UErP%2Bc46Lr%2Bj28wgLw%2BeeVjO4sVjEnLx3djoZD0Htei5XR0YQKVr%2FGDbS4iBOmjPsD5g4txKM6071zft%2BFK6U7I%2FfWjef2w4Nx%2BVvdATkNRpVEzbkAv1lBWMhfrOLy5koJfGepFk0BGQbTXNokhFCQYxzQuJBeC1xubKHzZSQLCVnTXt4EXA%3D%3D' \
+4-->    --header 'Content-Disposition: inline; filename=\"fishpic.jpg\"; filename*=UTF-8'\'''\''fishpic.jpg' \
+MD5sum  --header 'Content-Md5: EA5w4bPQDfzBgEbes8ZmuQ==' \
+        --header 'Content-Type:' \
+        --data-binary @fishpic.jpg
+
+     ** Pas de réponses sauf si erreur ***
+
+5- Fish Detection (Get):
+    - exemple en bash:  
+      curl --request GET \
+q=1-->  --url 'https://api.fishial.ai/v1/recognition/image?q=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNVJjRlE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ%3D%3D--269b0ee106c8739e2248645965ad0fc868b20c7c' \
+token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTkzNzQsImtpZCI6ImMwZmFlMTc0ZjI0YzA5NTAzNTJjMmJiZCJ9.SwJITJXPcGXu9E6UYPNXq0kTfPRZ_O-qe3FGV7ZTxZM'
+
+    -Réponse:
+        {
+          "results": [
+            {
+              "shape": { <redacted> },
+              "species": [
+                {
+nom -->           "name": "Esox lucius",
+plus haut -->     "accuracy": 1.0,
+                  "fishangler-id": "2a8d971e-de97-4295-8701-b4ea1a8f4da1",
+                  "fishangler-data": <redacted>
+                },
+                {
+                  "name": "Esox masquinongy",
+                  "accuracy": 0,
+                  "fishangler-id": "b9db34f3-4edb-4d6e-8fc6-f6588ca20299",
+                  "fishangler-data": <redacted>
+                },
+                {
+                  "name": "Salvelinus fontinalis",
+                  "accuracy": 0,
+                  "fishangler-id": "95672e98-93fa-4c16-b119-e384e6527424",
+                  "fishangler-data": <redacted>
+                },
+                {
+                  "name": "Sander vitreus",
+                  "accuracy": 0,
+                  "fishangler-id": "b1d261d9-eca8-4fdd-ae09-ca5257babf1b",
+                  "fishangler-data": <redacted>
+                }
+              ]
+            }
+          ]
+        }
