@@ -142,8 +142,14 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Caméra + Galerie')),
+      appBar: AppBar(
+        title: const Text('Caméra + Galerie'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
       body: Column(
         children: [
           const SizedBox(height: 10),
@@ -177,12 +183,20 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                 onPressed: _switchCamera,
                 icon: const Icon(Icons.cameraswitch),
                 label: const Text('Caméra'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
               ),
               const SizedBox(width: 20),
               ElevatedButton.icon(
                 onPressed: _takePhoto,
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Photo'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
               ),
             ],
           ),
@@ -265,12 +279,14 @@ class PhotoDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Photo', style: TextStyle(color: Colors.white)),
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        title: Text('Photo', style: TextStyle(color: colorScheme.onPrimary)),
       ),
       body: Column(
         children: [
@@ -292,8 +308,8 @@ class PhotoDetailScreen extends StatelessWidget {
                   icon: const Icon(Icons.delete),
                   label: const Text('Supprimer'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.error,
+                    foregroundColor: colorScheme.onError,
                   ),
                 ),
                 ElevatedButton.icon(
@@ -301,8 +317,8 @@ class PhotoDetailScreen extends StatelessWidget {
                   icon: const Icon(Icons.api),
                   label: const Text('Appel API'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.secondary,
+                    foregroundColor: colorScheme.onSecondary,
                   ),
                 ),
               ],
