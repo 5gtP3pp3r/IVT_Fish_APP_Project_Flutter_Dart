@@ -26,8 +26,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (_controller == null || _controller?.value.isInitialized == false)
+    if (_controller == null || _controller?.value.isInitialized == false) {
       return;
+    }
 
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
