@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fish_app/config/fishial_key_config.dart';
 
 Future<int> getImageByteSize(String picturePath) async {
   final file = File(picturePath);
@@ -32,7 +32,7 @@ Future<String> getAccessToken(String id, String secret) async {
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
-    return data['access_token']; 
+    return data['access_token'];
   } else {
     throw Exception(
         'Échec de l\'authentification: ${response.statusCode} - ${response.body}');
@@ -138,8 +138,8 @@ Future<String> identifyFish(String picturePath) async {
   final String mime = "image/jpeg";
 
   /********* hard code pour tester l'api fishial *********/
-  final String id = "ac546059a5a57d1802ce6179";
-  final String secret = "55a0a759810b8226526fecd4d5b26518";
+  final String id = FishialConfig.clientId;
+  final String secret = FishialConfig.clientSecret;
   /*******************************************************/
 
   final int byteSize = await getImageByteSize(picturePath);
