@@ -100,16 +100,6 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-/* // Page d'accueil
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Bienvenue sur InstaFish!'),
-    );
-  }
-} */
-
 class ProfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
