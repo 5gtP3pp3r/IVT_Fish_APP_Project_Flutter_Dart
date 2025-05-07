@@ -8,8 +8,12 @@ class FishIdentifier {
   Future<String> identifyFish(String picturePath) async {
     final String filname = picturePath.split("/").last;
     const String mime = "image/jpeg";
-    //final String id = FishialConfig.clientId;
-    //final String secret = FishialConfig.clientSecret;
+
+    // Clés via fichier .env
+    // final String id = FishialConfig.clientId;
+    // final String secret = FishialConfig.clientSecret;
+
+    // Clés via env.json
     final String id = await _getKey("FISHIAL_CLIENT_ID");
     final String secret = await _getKey("FISHIAL_CLIENT_SECRET");
 
@@ -28,17 +32,22 @@ class FishIdentifier {
     return await _fishDetection(signedId, accessToken);
   }
 
+  /************ Méthode temp extraction clés via .json ***********/
+  /***************** tester si .env fonctionne *******************/
   Future<String> _getKey(String key) async {
     final file = File('env.json');
     String contents = await file.readAsString();
     Map<String, dynamic> json = jsonDecode(contents);
 
     if (!json.containsKey(key)) {
+      //print('Clé introuvable');
       throw Exception('Clé $key non trouvée dans le fichier JSON');
     }
 
+    //print('Clé $key ${json[key].toString()}');
     return json[key].toString();
   }
+  /****************************************************************/
 
   Future<int> _getImageByteSize(String picturePath) async {
     final file = File(picturePath);
@@ -67,8 +76,10 @@ class FishIdentifier {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      //print('Access_token ${data['access_token']}');
       return data['access_token'];
     } else {
+      //print('Échec de l\'authentification');
       throw Exception(
           'Échec de l\'authentification: ${response.statusCode} - ${response.body}');
     }
@@ -101,8 +112,13 @@ class FishIdentifier {
       final contentDisposition =
           json['direct-upload']['headers']['Content-Disposition'];
 
+      // print('signed_id $signedId');
+      // print('upload url $uploadUrl');
+      // print('content-disposotion $contentDisposition');
+
       return '$signedId|$uploadUrl|$contentDisposition'; // réponse concatené, à séparer pour les 2 prochaines requêtes
     } else {
+      //print('Échec Post au cloud');
       throw Exception(
           'Échec de l\'upload : ${response.statusCode} - ${response.body}');
     }
@@ -121,10 +137,10 @@ class FishIdentifier {
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      print('✅ PUT vers Cloud Storage réussi');
+      //print('PUT vers Cloud Storage réussi');
     } else {
-      print('❌ Échec de l\'upload: ${response.statusCode}');
-      print('Réponse: ${response.body}');
+      // print('Échec de l\'upload: ${response.statusCode}');
+      // print('Réponse: ${response.body}');
       throw Exception('Erreur PUT vers Cloud');
     }
   }
@@ -160,8 +176,8 @@ class FishIdentifier {
 
       return fishName;
     } else {
-      print('❌ Erreur: ${response.statusCode}');
-      print('Réponse: ${response.body}');
+      // print('Erreur: ${response.statusCode}');
+      // print('Réponse: ${response.body}');
       throw Exception('Échec de la détection de poisson');
     }
   }
