@@ -105,3 +105,6 @@ doc/api/
 
 # End of https://www.toptal.com/developers/gitignore/api/dart
 .vscode/settings.json
+fish_app/macos/Flutter/GeneratedPluginRegistrant.swift
+fish_app/windows/flutter/generated_plugin_registrant.cc
+fish_app/windows/flutter/generated_plugins.cmake
