@@ -2,14 +2,16 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
-import 'package:fish_app/config/fishial_key_config.dart';
+//import 'package:fish_app/config/fishial_key_config.dart';
 
 class FishIdentifier {
   Future<String> identifyFish(String picturePath) async {
     final String filname = picturePath.split("/").last;
-    final String mime = "image/jpeg";
-    final String id = FishialConfig.clientId;
-    final String secret = FishialConfig.clientSecret;
+    const String mime = "image/jpeg";
+    //final String id = FishialConfig.clientId;
+    //final String secret = FishialConfig.clientSecret;
+    final String id = await _getKey("FISHIAL_CLIENT_ID");
+    final String secret = await _getKey("FISHIAL_CLIENT_SECRET");
 
     final int byteSize = await _getImageByteSize(picturePath);
     final String checksum = await _getMd5ChecksumBase64(picturePath);
@@ -17,13 +19,25 @@ class FishIdentifier {
     final String cloudUploadResult = await _uploadPictureCloudResult(
         accessToken, filname, mime, byteSize, checksum);
 
-    final signedId = cloudUploadResult.split("/").first;
-    final urlCloud = cloudUploadResult.split("/")[1];
-    final contentDisposition = cloudUploadResult.split("/").last;
+    final signedId = cloudUploadResult.split("|").first;
+    final urlCloud = cloudUploadResult.split("|")[1];
+    final contentDisposition = cloudUploadResult.split("|").last;
 
-    await _sendPicture(urlCloud, contentDisposition, checksum);
+    await _sendPicture(picturePath, urlCloud, contentDisposition, checksum);
 
     return await _fishDetection(signedId, accessToken);
+  }
+
+  Future<String> _getKey(String key) async {
+    final file = File('env.json');
+    String contents = await file.readAsString();
+    Map<String, dynamic> json = jsonDecode(contents);
+
+    if (!json.containsKey(key)) {
+      throw Exception('Clé $key non trouvée dans le fichier JSON');
+    }
+
+    return json[key].toString();
   }
 
   Future<int> _getImageByteSize(String picturePath) async {
@@ -87,23 +101,24 @@ class FishIdentifier {
       final contentDisposition =
           json['direct-upload']['headers']['Content-Disposition'];
 
-      return '$signedId/$uploadUrl/$contentDisposition'; // réponse concatené, à séparer pour les 2 prochaines requêtes
+      return '$signedId|$uploadUrl|$contentDisposition'; // réponse concatené, à séparer pour les 2 prochaines requêtes
     } else {
       throw Exception(
           'Échec de l\'upload : ${response.statusCode} - ${response.body}');
     }
   }
 
-  Future<void> _sendPicture(
-      String urlCloud, String contentDisposition, String checksum) async {
-        final response = await http.put(
-          Uri.parse(urlCloud),
-          headers: {
-            'Content-Disposition': contentDisposition,
-            'Content-Md5': checksum,
-            'Content-Type': '',
-          },
-        );
+  Future<void> _sendPicture(String picturePath, String urlCloud,
+      String contentDisposition, String checksum) async {
+    final response = await http.put(
+      Uri.parse(urlCloud),
+      headers: {
+        'Content-Disposition': contentDisposition,
+        'Content-Md5': checksum,
+        'Content-Type': '',
+      },
+      body: File(picturePath).readAsBytesSync(),
+    );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       print('✅ PUT vers Cloud Storage réussi');
