@@ -26,8 +26,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (_controller == null || _controller?.value.isInitialized == false)
+    if (_controller == null || _controller?.value.isInitialized == false) {
       return;
+    }
 
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
@@ -121,6 +122,18 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _deletePhoto(String photoPath) async {
+    try {
+      final file = File(photoPath);
+      if (await file.exists()) {
+        await file.delete();
+        _loadSavedPhotos(); // Rafraîchir la galerie après suppression
+      }
+    } catch (e) {
+      print('Erreur lors de la suppression de la photo: $e');
+    }
+  }
+
   @override
   void dispose() {
     _controller?.dispose();
@@ -129,8 +142,14 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Caméra + Galerie')),
+      appBar: AppBar(
+        title: const Text('Caméra + Galerie'),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
       body: Column(
         children: [
           const SizedBox(height: 10),
@@ -164,12 +183,20 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                 onPressed: _switchCamera,
                 icon: const Icon(Icons.cameraswitch),
                 label: const Text('Caméra'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
               ),
               const SizedBox(width: 20),
               ElevatedButton.icon(
                 onPressed: _takePhoto,
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Photo'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
               ),
             ],
           ),
@@ -179,7 +206,10 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           Expanded(
             child: _savedPhotos.isEmpty
                 ? const Center(child: Text('Aucune photo disponible'))
-                : PhotoGallery(photos: _savedPhotos),
+                : PhotoGallery(
+                    photos: _savedPhotos,
+                    onDelete: _deletePhoto,
+                  ),
           ),
         ],
       ),
@@ -189,8 +219,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
 class PhotoGallery extends StatelessWidget {
   final List<String> photos;
-
-  const PhotoGallery({super.key, required this.photos});
+  final Function(String) onDelete;
+  const PhotoGallery({super.key, required this.photos, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -203,11 +233,99 @@ class PhotoGallery extends StatelessWidget {
         mainAxisSpacing: 8,
       ),
       itemBuilder: (context, index) {
-        return Image.file(
-          File(photos[index]),
-          fit: BoxFit.cover,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PhotoDetailScreen(
+                  photoPath: photos[index],
+                  onDelete: () {
+                    onDelete(photos[index]); // <-- suppression directe
+                    Navigator.pop(context);
+                  },
+                  onApiCall: () {
+                    // Cette fonction sera implémentée plus tard
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('API Call sera implémenté plus tard')),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+          child: Image.file(
+            File(photos[index]),
+            fit: BoxFit.cover,
+          ),
         );
       },
+    );
+  }
+}
+
+class PhotoDetailScreen extends StatelessWidget {
+  final String photoPath;
+  final VoidCallback onDelete;
+  final VoidCallback onApiCall;
+
+  const PhotoDetailScreen({
+    Key? key,
+    required this.photoPath,
+    required this.onDelete,
+    required this.onApiCall,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        title: Text('Photo', style: TextStyle(color: colorScheme.onPrimary)),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.file(
+                File(photoPath),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete),
+                  label: const Text('Supprimer'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.error,
+                    foregroundColor: colorScheme.onError,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: onApiCall,
+                  icon: const Icon(Icons.api),
+                  label: const Text('Appel API'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.secondary,
+                    foregroundColor: colorScheme.onSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

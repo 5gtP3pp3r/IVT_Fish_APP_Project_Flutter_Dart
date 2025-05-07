@@ -22,7 +22,8 @@ class _LoginPageState extends State<LoginPage> {
       widget.onLoginSuccess();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nom d\'utilisateur ou mot de passe incorrect.')),
+        const SnackBar(
+            content: Text('Nom d\'utilisateur ou mot de passe incorrect.')),
       );
     }
   }

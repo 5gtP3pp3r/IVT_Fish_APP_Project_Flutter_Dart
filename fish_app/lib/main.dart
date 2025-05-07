@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fish_app/login_page.dart';
 import 'package:flutter/services.dart';
 import 'photo.dart';
+import 'home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'App avec navigation',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors
+              .teal, // Change la couleur ici si tu veux une autre ambiance
+          brightness: Brightness.light,
+        ),
+      ),
       home: isLoggedIn
           ? const MainPage()
           : LoginPage(onLoginSuccess: handleLoginSuccess),
@@ -41,7 +50,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -91,17 +99,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
-
-// Page d'accueil
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Bienvenue sur InstaFish!'),
-    );
-  }
-}
-
 
 class ProfilPage extends StatelessWidget {
   @override
