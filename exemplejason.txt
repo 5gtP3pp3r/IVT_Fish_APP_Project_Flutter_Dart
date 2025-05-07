@@ -93,10 +93,10 @@ token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTk
         --header 'Content-Type: application/json' \
         --data '{
           "blob": {
-            "filename": "fishpic.jpg",
-            "content_type": "image/jpeg",
-            "byte_size": 2204455,
-            "checksum": "EA5w4bPQDfzBgEbes8ZmuQ=="
+filename    "filename": "fishpic.jpg",
+mime        "content_type": "image/jpeg",
+byte_size   "byte_size": 2204455,
+checksum    "checksum": "EA5w4bPQDfzBgEbes8ZmuQ=="
           }
         }'
 
@@ -116,8 +116,8 @@ token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTk
           "direct-upload": {
   2-->      "url": "https://storage.googleapis.com/backend-fishes-storage-prod/hpleg1o4wez3e7mvy1sivhep9dw6?GoogleAccessId=services-storage-client%40ecstatic-baton-230905.iam.gserviceaccount.com&Expires=1656619087&Signature=aMeN%2FVW4I6LDgLRUEW0jzJqeA89gRpjn0TBcGMEnal3RU1iGqe0uOraHainV5qUw6tRPEBRBJ6rMeu9x0AmX6OC3Q8cCCmBUMs4k1jCQOnnCNgkttpU7ov%2FeZ9WpPr47rTQSd5np7jCG3EWVEBhNeP25%2BTx5JlKQQ8UErP%2Bc46Lr%2Bj28wgLw%2BeeVjO4sVjEnLx3djoZD0Htei5XR0YQKVr%2FGDbS4iBOmjPsD5g4txKM6071zft%2BFK6U7I%2FfWjef2w4Nx%2BVvdATkNRpVEzbkAv1lBWMhfrOLy5koJfGepFk0BGQbTXNokhFCQYxzQuJBeC1xubKHzZSQLCVnTXt4EXA%3D%3D",
             "headers": {
-  3-->      "Content-MD5": "EA5w4bPQDfzBgEbes8ZmuQ==",
-  4-->      "Content-Disposition": "inline; filename=\"fishpic.jpg\"; filename*=UTF-8''fishpic.jpg"
+            "Content-MD5": "EA5w4bPQDfzBgEbes8ZmuQ==",
+  3-->      "Content-Disposition": **"inline; filename=\"fishpic.jpg\"; filename*=UTF-8''fishpic.jpg"**
             }
           }
         }    
@@ -126,7 +126,7 @@ token   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTY2MTk
     - exemple en bash:
       curl --request PUT \
 2-->    --url 'https://storage.googleapis.com/backend-fishes-storage-prod/hpleg1o4wez3e7mvy1sivhep9dw6?GoogleAccessId=services-storage-client%40ecstatic-baton-230905.iam.gserviceaccount.com&Expires=1656619087&Signature=aMeN%2FVW4I6LDgLRUEW0jzJqeA89gRpjn0TBcGMEnal3RU1iGqe0uOraHainV5qUw6tRPEBRBJ6rMeu9x0AmX6OC3Q8cCCmBUMs4k1jCQOnnCNgkttpU7ov%2FeZ9WpPr47rTQSd5np7jCG3EWVEBhNeP25%2BTx5JlKQQ8UErP%2Bc46Lr%2Bj28wgLw%2BeeVjO4sVjEnLx3djoZD0Htei5XR0YQKVr%2FGDbS4iBOmjPsD5g4txKM6071zft%2BFK6U7I%2FfWjef2w4Nx%2BVvdATkNRpVEzbkAv1lBWMhfrOLy5koJfGepFk0BGQbTXNokhFCQYxzQuJBeC1xubKHzZSQLCVnTXt4EXA%3D%3D' \
-4-->    --header 'Content-Disposition: inline; filename=\"fishpic.jpg\"; filename*=UTF-8'\'''\''fishpic.jpg' \
+3-->    --header 'Content-Disposition: inline; filename=\"fishpic.jpg\"; filename*=UTF-8'\'''\''fishpic.jpg' \
 MD5sum  --header 'Content-Md5: EA5w4bPQDfzBgEbes8ZmuQ==' \
         --header 'Content-Type:' \
         --data-binary @fishpic.jpg
