@@ -8,9 +8,7 @@ format liste image
       	"date" : "2025-04-24",
       	"time" : "13:15:00",
       	"temp" : 18.5,
-      	"precipitype" : [
-        	"rain"
-      	],
+      	"precipitype" : "rain",
       	"cloudcover" : 40.5,
       	"uvindex" : 9,
       	"moonphase" : 0.89
