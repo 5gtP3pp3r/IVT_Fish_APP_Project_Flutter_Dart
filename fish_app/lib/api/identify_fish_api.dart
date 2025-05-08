@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 //import 'package:fish_app/config/fishial_key_config.dart';
 
 class FishIdentifier {
-  Future<String> identifyFish(String picturePath) async {
+  Future<String> fetchFishIndetity(String picturePath) async {
     final String filname = picturePath.split("/").last;
     const String mime = "image/jpeg";
 

@@ -14,7 +14,7 @@ void main() {
         reason: 'Le fichier image doit exister');
 
     final identifier = FishIdentifier();
-    final result = await identifier.identifyFish(picturePath);
+    final result = await identifier.fetchFishIndetity(picturePath);
 
     print('Résultat: $result'); // print console VSCode
     expect(result.isNotEmpty, true);
