@@ -1,38 +1,45 @@
 import 'package:geolocator/geolocator.dart';
 
-class GeoLocator{
-Future<void> getCurrentLocation() async {
-  bool serviceEnabled;
-  LocationPermission permission;
+class GeoLocator {
+  Future<String> getCurrentLocation() async {
+    bool service = await _isServiceAvailable();
+    bool permission = await _hasLocationPermission();
 
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    print('Service de localisation désactivé');
-    return;
+    if (service && permission) {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      print('Latitude: $latitude, Longitude: $longitude');
+      return '$latitude|$longitude';
+    }
+
+    return 'Localisation unavailable';
   }
 
-  // Vérifie les permissions
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
+  Future<bool> _isServiceAvailable() async {
+    bool isServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isServiceEnabled) {
+      print('Service de localisation désactivé');
+    }
+    return isServiceEnabled;
+  }
+
+  Future<bool> _hasLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
     if (permission == LocationPermission.denied) {
       print('Permission refusée');
-      return;
+      return false;
+    } else if (permission == LocationPermission.deniedForever) {
+      print('Permission refusée définitivement');
+      return false;
     }
+    return true;
   }
-
-  if (permission == LocationPermission.deniedForever) {
-    print('Permission refusée définitivement');
-    return;
-  }
-
-  Position position = await Geolocator.getCurrentPosition(
-    desiredAccuracy: LocationAccuracy.high,
-  );
-
-  double latitude = position.latitude;
-  double longitude = position.longitude;
-
-  print('Latitude: $latitude, Longitude: $longitude');
-}
 }
