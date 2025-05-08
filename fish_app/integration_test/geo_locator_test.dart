@@ -9,7 +9,7 @@ void main() {
     final geo = GeoLocator();
     final result = await geo.getCurrentLocation();
 
-    print('🛰 Résultat de géolocalisation: $result');
+    print('Résultat de géolocalisation: $result');
     expect(result, contains('|'));
   });
 }

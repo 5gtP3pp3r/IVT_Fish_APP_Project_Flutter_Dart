@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
 //import 'package:fish_app/config/fishial_key_config.dart';
 
 class FishIdentifier {
@@ -35,8 +36,7 @@ class FishIdentifier {
   /************ Méthode temp extraction clés via .json ***********/
   /***************** tester si .env fonctionne *******************/
   Future<String> _getKey(String key) async {
-    final file = File('env.json');
-    String contents = await file.readAsString();
+    final contents = await rootBundle.loadString('env.json');
     Map<String, dynamic> json = jsonDecode(contents);
 
     if (!json.containsKey(key)) {
