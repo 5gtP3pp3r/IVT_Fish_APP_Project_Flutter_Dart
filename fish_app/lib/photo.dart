@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:path/path.dart' as path;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -85,20 +87,40 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     await _initializeControllerFuture;
 
     final directory = await getApplicationDocumentsDirectory();
-    final String fileName =
-        'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final String filePath = path.join(directory.path, fileName);
+    final fileName = 'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final filePath = path.join(directory.path, fileName);
 
     final image = await _controller!.takePicture();
-
     await File(image.path).copy(filePath);
-
     await Gal.putImage(filePath);
+
+    // 1) Prépare la date et l’heure au moment de la photo
+    final now = DateTime.now();
+
+    // 2) Charge ou crée le JSON
+    final metaFile = File(path.join(directory.path, 'metadata.json'));
+    Map<String, dynamic> meta = {};
+    if (await metaFile.exists()) {
+      meta = json.decode(await metaFile.readAsString()) as Map<String, dynamic>;
+    }
+
+    // 3) Ajoute l’entrée avec tous les champs par défaut
+    meta[fileName] = {
+      'Espece poisson': null,
+      'date': null,
+      'heure': null,
+      'temperature': null,
+      'precipitation': null,
+      'cloud cover': null,
+      'moon': null,
+    };
+
+    // 4) Sauvegarde
+    await metaFile.writeAsString(json.encode(meta));
 
     setState(() {
       _photo = XFile(filePath);
     });
-
     _loadSavedPhotos();
   }
 
@@ -124,13 +146,35 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
   Future<void> _deletePhoto(String photoPath) async {
     try {
+      // 1) Supprimer la photo du disque
       final file = File(photoPath);
       if (await file.exists()) {
         await file.delete();
-        _loadSavedPhotos(); // Rafraîchir la galerie après suppression
       }
+
+      // 2) Charger et mettre à jour le JSON
+      final directory = await getApplicationDocumentsDirectory();
+      final metaFile = File(path.join(directory.path, 'metadata.json'));
+
+      if (await metaFile.exists()) {
+        // Lire le contenu actuel
+        final content = await metaFile.readAsString();
+        final Map<String, dynamic> meta =
+            json.decode(content) as Map<String, dynamic>;
+
+        // Supprimer la clé liée à cette photo
+        final key = path.basename(photoPath);
+        if (meta.containsKey(key)) {
+          meta.remove(key);
+          // Réécrire le JSON mis à jour
+          await metaFile.writeAsString(json.encode(meta));
+        }
+      }
+
+      // 3) Raffraîchir la galerie
+      _loadSavedPhotos();
     } catch (e) {
-      print('Erreur lors de la suppression de la photo: $e');
+      print('Erreur lors de la suppression de la photo ou du JSON: $e');
     }
   }
 
@@ -284,43 +328,80 @@ class PhotoDetailScreen extends StatefulWidget {
 class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
   bool _isLoading = false;
   bool _isExpanded = false;
-  Map<String, String>? _resultData;
+  Map<String, dynamic>? _resultData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMetadata();
+  }
+
+  Future<void> _loadMetadata() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final metaFile = File(path.join(dir.path, 'metadata.json'));
+    if (!await metaFile.exists()) return;
+
+    final content = await metaFile.readAsString();
+    final Map<String, dynamic> allMeta = json.decode(content);
+    final key = path.basename(widget.photoPath);
+
+    if (allMeta.containsKey(key) && allMeta[key] != null) {
+      _resultData = Map<String, dynamic>.from(allMeta[key]);
+      _isExpanded = true;
+      setState(() {});
+    }
+  }
 
   Future<void> _callApi() async {
     setState(() {
       _isLoading = true;
-      _isExpanded =
-          true; // Ouvrir automatiquement le dropdown lors de l'appel API
+      _isExpanded = true;
     });
 
     try {
-      // Simulation d'appel API - remplacez par votre implémentation existante
+      // Remplace cette partie par ton appel réel
       await Future.delayed(const Duration(seconds: 2));
+      final data = {
+        "Espece poisson": "Bar commun (Dicentrarchus labrax)",
+        "date": "2025-05-15",
+        "heure": "13:45:02",
+        "temperature": "22°C",
+        "precipitation": "0 mm",
+        "cloud cover": "10%",
+        "moon": "Pleine lune",
+      };
 
-      setState(() {
-        _resultData = {
-          "Nom du poisson": "Bar commun (Dicentrarchus labrax)",
-          "Cycle lunaire": "Pleine lune (98%)",
-          "Marée": "Haute marée - 4.2m",
-          "Météo": "Ensoleillé, 22°C",
-          "Saison de pêche": "Optimale",
-          "Habitat": "Eaux côtières, profondeur moyenne",
-        };
+      // Sauvegarde dans metadata.json
+      final dir = await getApplicationDocumentsDirectory();
+      final metaFile = File(path.join(dir.path, 'metadata.json'));
+      Map<String, dynamic> meta = {};
+      if (await metaFile.exists()) {
+        meta =
+            json.decode(await metaFile.readAsString()) as Map<String, dynamic>;
+      }
+      final key = path.basename(widget.photoPath);
+      meta[key] = data;
+      await metaFile.writeAsString(json.encode(meta));
+
+       setState(() {
+        _resultData = data;
       });
     } catch (e) {
-      setState(() {
-        _resultData = null;
-      });
+      // En cas d'erreur, on réinitialise
+      setState(() => _resultData = null);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    // On n'affiche le bouton API que si pas de données
+    // ou si l'espèce de poisson n'est pas encore renseignée
+    final showApiButton = _resultData == null ||
+        _resultData!['Espece poisson'] == null;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -331,7 +412,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       ),
       body: Column(
         children: [
-          // Image section - flexible pour prendre l'espace disponible
+          // Affichage de l'image
           Expanded(
             child: Center(
               child: Image.file(
@@ -340,7 +421,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               ),
             ),
           ),
-          // Section dropdown pour les informations
+
+          // Dropdown "Informations"
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -359,13 +441,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             ),
             child: Column(
               children: [
-                // En-tête du dropdown (toujours visible)
                 InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
+                  onTap: () => setState(() => _isExpanded = !_isExpanded),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
@@ -380,7 +457,6 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                             color: colorScheme.primary,
                           ),
                         ),
-                        // Icône pour indiquer l'état du dropdown
                         Icon(
                           _isExpanded
                               ? Icons.keyboard_arrow_up
@@ -391,11 +467,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                     ),
                   ),
                 ),
-                // Contenu du dropdown (visible uniquement si _isExpanded est true)
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   height: _isExpanded
-                      ? (_isLoading ? 100 : (_resultData != null ? 250 : 80))
+                      ? (_isLoading
+                          ? 100
+                          : (_resultData != null ? 250 : 80))
                       : 0,
                   curve: Curves.easeInOut,
                   child: AnimatedOpacity(
@@ -406,16 +483,20 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                           horizontal: 16.0, vertical: 8.0),
                       child: _isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : _resultData == null
+                          : (_resultData == null
                               ? const Center(
                                   child: Text(
-                                    'Cliquez sur "Appel API" pour obtenir les informations sur cette photo',
+                                    'Pas encore d’infos',
                                     textAlign: TextAlign.center,
                                   ),
                                 )
                               : SingleChildScrollView(
                                   child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: _resultData!.entries.map((entry) {
+                                      final textValue =
+                                          entry.value?.toString() ?? '';
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
                                             vertical: 6.0),
@@ -424,18 +505,17 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              "${entry.key}: ",
+                                              '${entry.key}: ',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: colorScheme.onSurface,
+                                                color:
+                                                    colorScheme.onSurface,
                                               ),
                                             ),
                                             Expanded(
                                               child: Text(
-                                                entry.value,
+                                                textValue,
                                                 style: TextStyle(
-                                                  fontSize: 16,
                                                   color: colorScheme
                                                       .onSurfaceVariant,
                                                 ),
@@ -446,13 +526,14 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                                       );
                                     }).toList(),
                                   ),
-                                ),
+                                )),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+
           // Boutons
           Container(
             color: Colors.white,
@@ -468,30 +549,27 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.error,
                     foregroundColor: colorScheme.onError,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _callApi,
-                  icon: _isLoading
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: colorScheme.onSecondary,
-                          ),
-                        )
-                      : const Icon(Icons.api),
-                  label: Text(_isLoading ? 'Chargement...' : 'Appel API'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.secondary,
-                    foregroundColor: colorScheme.onSecondary,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
+                if (showApiButton)
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _callApi,
+                    icon: _isLoading
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colorScheme.onSecondary,
+                            ),
+                          )
+                        : const Icon(Icons.api),
+                    label: Text(_isLoading ? 'Chargement...' : 'Appel API'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.secondary,
+                      foregroundColor: colorScheme.onSecondary,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
