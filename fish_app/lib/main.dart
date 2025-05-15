@@ -3,13 +3,9 @@ import 'package:fish_app/login_page.dart';
 import 'package:flutter/services.dart';
 import 'photo.dart';
 import 'home.dart';
-//import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // mods main en void async pour pouvoir importer les clés depuis le .env sécuritaire
-  //await dotenv.load(); 
-
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
