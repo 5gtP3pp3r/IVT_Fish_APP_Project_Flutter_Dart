@@ -10,10 +10,6 @@ class FishIdentifier {
     final String filname = picturePath.split("/").last;
     const String mime = "image/jpeg";
 
-    // Clés via fichier .env
-    // final String id = FishialConfig.clientId;
-    // final String secret = FishialConfig.clientSecret;
-
     // Clés via env.json
     final String id = await _getKey("FISHIAL_CLIENT_ID");
     final String secret = await _getKey("FISHIAL_CLIENT_SECRET");
@@ -33,8 +29,6 @@ class FishIdentifier {
     return await _fishDetection(signedId, accessToken);
   }
 
-  /************ Méthode temp extraction clés via .json ***********/
-  /***************** tester si .env fonctionne *******************/
   Future<String> _getKey(String key) async {
     final contents = await rootBundle.loadString('env.json');
     Map<String, dynamic> json = jsonDecode(contents);
@@ -47,7 +41,6 @@ class FishIdentifier {
     //print('Clé $key ${json[key].toString()}');
     return json[key].toString();
   }
-  /****************************************************************/
 
   Future<int> _getImageByteSize(String picturePath) async {
     final file = File(picturePath);
