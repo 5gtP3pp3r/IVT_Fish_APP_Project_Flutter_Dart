@@ -198,21 +198,21 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           // Section caméra
           _controller == null
               ? const SizedBox(
-                  width: 330,
-                  height: 330,
+                  width: 300,
+                  height: 400,
                   child: Center(child: CircularProgressIndicator()))
               : FutureBuilder<void>(
                   future: _initializeControllerFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState != ConnectionState.done) {
                       return const SizedBox(
-                          width: 330,
-                          height: 330,
+                          width: 300,
+                          height: 400,
                           child: Center(child: CircularProgressIndicator()));
                     }
                     return SizedBox(
-                      width: 330,
-                      height: 330,
+                      width: 300,
+                      height: 400,
                       child: CameraPreview(_controller!),
                     );
                   },
