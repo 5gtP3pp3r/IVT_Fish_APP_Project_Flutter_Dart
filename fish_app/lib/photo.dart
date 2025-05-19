@@ -6,7 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'package:path/path.dart' as path;
 import 'dart:convert';
-import 'package:intl/intl.dart';
+import 'api/identify_fish_api.dart';
+import 'api/meteo_api.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -93,9 +94,6 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     final image = await _controller!.takePicture();
     await File(image.path).copy(filePath);
     await Gal.putImage(filePath);
-
-    // 1) Prépare la date et l’heure au moment de la photo
-    final now = DateTime.now();
 
     // 2) Charge ou crée le JSON
     final metaFile = File(path.join(directory.path, 'metadata.json'));
@@ -347,7 +345,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
     if (allMeta.containsKey(key) && allMeta[key] != null) {
       _resultData = Map<String, dynamic>.from(allMeta[key]);
-      _isExpanded = true;
+      _isExpanded = false;
       setState(() {});
     }
   }
@@ -358,40 +356,71 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       _isExpanded = true;
     });
 
-    try {
-      // Remplace cette partie par ton appel réel
-      await Future.delayed(const Duration(seconds: 2));
-      final data = {
-        "Espece poisson": "Bar commun (Dicentrarchus labrax)",
-        "date": "2025-05-15",
-        "heure": "13:45:02",
-        "temperature": "22°C",
-        "precipitation": "0 mm",
-        "cloud cover": "10%",
-        "moon": "Pleine lune",
-      };
+    final date = DateTime.now();
+    final dateStr = '${date.year}-${date.month}-${date.day}';
+    final timeStr = '${date.hour}:${date.minute}';
 
-      // Sauvegarde dans metadata.json
+    final String imagePath = widget.photoPath;
+    final Map<String, dynamic> data = {
+      'Espece poisson': null,
+      'date': dateStr,
+      'heure': timeStr,
+      'temperature': null,
+      'precipitation': null,
+      'cloud cover': null,
+      'uvIndex': null,
+      'moon': null,
+    };
+
+    // Appel API pour récupérer les données
+
+    try {
+      final fishIdentifier = FishIdentifier();
+      final String fishName = await fishIdentifier.fetchFishIndetity(imagePath);
+      data['Espece poisson'] = fishName;
+    } catch (e) {
+      print('Erreur lors de l’identification du poisson : $e');
+    }
+
+    try {
+      final meteoApi = CallMeteo();
+      final String meteoData = await meteoApi.fetchWeather();
+      final parts = meteoData.split('|');
+
+      if (parts.length >= 7) {       
+        data['temperature'] = parts[2];
+        data['precipitation'] = parts[3];
+        data['cloud cover'] = parts[4];
+        data['uvIndex'] = parts[5];
+        data['moon'] = parts[6];
+      } else {
+        print('Format météo inattendu : $meteoData');
+      }
+    } catch (e) {
+      print('Erreur lors de la récupération météo : $e');
+    }
+
+    // Sauvegarde dans metadata.json
+    try {
       final dir = await getApplicationDocumentsDirectory();
       final metaFile = File(path.join(dir.path, 'metadata.json'));
+
       Map<String, dynamic> meta = {};
       if (await metaFile.exists()) {
-        meta =
-            json.decode(await metaFile.readAsString()) as Map<String, dynamic>;
+        meta = json.decode(await metaFile.readAsString());
       }
-      final key = path.basename(widget.photoPath);
+
+      final key = path.basename(imagePath);
       meta[key] = data;
       await metaFile.writeAsString(json.encode(meta));
-
-       setState(() {
-        _resultData = data;
-      });
     } catch (e) {
-      // En cas d'erreur, on réinitialise
-      setState(() => _resultData = null);
-    } finally {
-      setState(() => _isLoading = false);
+      print('Erreur écriture metadata.json : $e');
     }
+
+    setState(() {
+      _resultData = data;
+      _isLoading = false;
+    });
   }
 
   @override
@@ -400,8 +429,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
     // On n'affiche le bouton API que si pas de données
     // ou si l'espèce de poisson n'est pas encore renseignée
-    final showApiButton = _resultData == null ||
-        _resultData!['Espece poisson'] == null;
+    final showApiButton =
+        _resultData == null || _resultData!['Espece poisson'] == null;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -470,9 +499,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   height: _isExpanded
-                      ? (_isLoading
-                          ? 100
-                          : (_resultData != null ? 250 : 80))
+                      ? (_isLoading ? 100 : (_resultData != null ? 250 : 80))
                       : 0,
                   curve: Curves.easeInOut,
                   child: AnimatedOpacity(
@@ -508,8 +535,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                                               '${entry.key}: ',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                color:
-                                                    colorScheme.onSurface,
+                                                color: colorScheme.onSurface,
                                               ),
                                             ),
                                             Expanded(
@@ -535,42 +561,45 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
           ),
 
           // Boutons
-          Container(
-            color: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: widget.onDelete,
-                  icon: const Icon(Icons.delete),
-                  label: const Text('Supprimer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.error,
-                    foregroundColor: colorScheme.onError,
-                  ),
-                ),
-                if (showApiButton)
+          SafeArea(
+            top: false, // on ne met le SafeArea qu’en bas
+            child: Container(
+              color: Colors.white,
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
                   ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _callApi,
-                    icon: _isLoading
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.onSecondary,
-                            ),
-                          )
-                        : const Icon(Icons.api),
-                    label: Text(_isLoading ? 'Chargement...' : 'Appel API'),
+                    onPressed: widget.onDelete,
+                    icon: const Icon(Icons.delete),
+                    label: const Text('Supprimer'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.secondary,
-                      foregroundColor: colorScheme.onSecondary,
+                      backgroundColor: colorScheme.error,
+                      foregroundColor: colorScheme.onError,
                     ),
                   ),
-              ],
+                  if (showApiButton)
+                    ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _callApi,
+                      icon: _isLoading
+                          ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: colorScheme.onSecondary,
+                              ),
+                            )
+                          : const Icon(Icons.api),
+                      label: Text(_isLoading ? 'Chargement...' : 'Appel API'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.secondary,
+                        foregroundColor: colorScheme.onSecondary,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
