@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
-//import 'package:fish_app/config/fishial_key_config.dart';
 
 class FishIdentifier {
   Future<String> fetchFishIndetity(String picturePath) async {
     final String filname = picturePath.split("/").last;
     const String mime = "image/jpeg";
 
-    // Clés via env.json
     final String id = await _getKey("FISHIAL_CLIENT_ID");
     final String secret = await _getKey("FISHIAL_CLIENT_SECRET");
 

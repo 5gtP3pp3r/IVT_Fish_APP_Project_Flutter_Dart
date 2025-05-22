@@ -60,7 +60,7 @@ ac546059a5a57d1802ce6179
 ÉTAPES POUR UTILISER L'API FISHIAL.API
 **************************************
 
-1- Obtenir les metedata de la photo:
+1- Obtenir les metedatas de la photo:
   - file name ->  .jpg
   - MIME      ->  image/jpeg
   - byte size ->  1234546789...
